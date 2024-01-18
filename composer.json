@@ -1,0 +1,15 @@
+{
+    "name": "mikus/2024-01-17-taskman",
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/"
+        }
+    },
+    "authors": [
+        {
+            "name": "MikusR",
+            "email": "mikus.rakis@gmail.com"
+        }
+    ],
+    "require": {}
+}
