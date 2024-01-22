@@ -23,7 +23,7 @@ class TaskCollection
         $this->tasks[] = $task;
     }
 
-    public function get_all(): array
+    public function getAll(): array
     {
         return $this->tasks;
     }

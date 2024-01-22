@@ -26,22 +26,22 @@ class Task
         $this->id          = $id;
     }
 
-    public function get_name(): string
+    public function getName(): string
     {
         return $this->name;
     }
 
-    public function get_description(): ?string
+    public function getDescription(): ?string
     {
         return $this->description;
     }
 
-    public function get_created(): ?Carbon
+    public function getCreated(): ?Carbon
     {
         return $this->created;
     }
 
-    public function get_id(): ?int
+    public function getId(): ?int
     {
         return $this->id ?? null;
     }
