@@ -1,0 +1,26 @@
+List of tasks
+<form method="post" action="/">
+
+    <label>Name:
+        <input name="name" type="text">
+    </label>
+    <label for="description">Description:</label>
+    <textarea id="description" name="description">Description</textarea>
+    <button type="submit">Add</button>
+
+</form>
+
+{% for task in tasks.all %}
+    <div>
+        <h3><a href="/task/{{ task.id }}">{{ task.name }}</a></h3>
+        <h2>{{ task.description }}</h2>
+        <p>{{ task.created }}</p>
+
+        {#        onclick="return confirm('delete?')" #}
+        <form action="/task/{{ task.id }}/delete" method="post">
+            <button type="submit">delete</button>
+        </form>
+        <br/>
+    </div>
+{% endfor %}
+

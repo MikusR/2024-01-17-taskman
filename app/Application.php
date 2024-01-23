@@ -1,63 +1,75 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App;
 
-use App\Models\Task;
-use App\Models\TaskCollection;
-use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\DriverManager;
+use App\Controllers\TaskController;
 use Doctrine\DBAL\Exception;
+use Twig\Environment;
+use Twig\Loader\FilesystemLoader;
+use FastRoute;
 
 
 class Application
 {
-    protected Connection $database;
 
-    public function __construct()
-    {
-        $connectionParams = [
-            'dbname'   => 'task_manager',
-            'user'     => 'taskman',
-            'password' => 'taskman',
-            'host'     => 'localhost',
-            'driver'   => 'pdo_mysql',
-        ];
-        try {
-            $this->database = DriverManager::getConnection($connectionParams);
-        } catch (Exception $e) {
-            var_dump($e);
-        }
-    }
 
     public function run(): void
     {
-        try {
-            $taskList = $this->database->createQueryBuilder()
-                                       ->select('*')
-                                       ->from('tasks')
-                                       ->fetchAllAssociative();
-        } catch (Exception $e) {
-        }
+        //Initialize twig
+        $loader = new FilesystemLoader(__DIR__ . '/Views');
+        $twig   = new Environment($loader, []);
+        $twig->addGlobal('errors', false);
+        //Router
+        $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) {
+            $r->addRoute('GET', '/', [TaskController::class, 'index']);
+            $r->addRoute('POST', '/', [TaskController::class, 'add']);
+            $r->addRoute('GET', '/task/{id:\d+}', [TaskController::class, 'show']);
+            $r->addRoute('POST', '/task/{id:\d+}/delete', [TaskController::class, 'delete']);
+        });
 
-        $tasks = new TaskCollection();
-        foreach ($taskList as $task) {
-            $tasks->add(
-                $this->buildModel($task)
-            );
-        }
-        echo "<pre>\n";
-//        header('Content-Type: application/json');
+        $httpMethod = $_SERVER['REQUEST_METHOD'];
+        $uri        = $_SERVER['REQUEST_URI'];
 
-        var_dump($tasks);
+        if (false !== $pos = strpos($uri, '?')) {
+            $uri = substr($uri, 0, $pos);
+        }
+        $uri = rawurldecode($uri);
+
+        $routeInfo = $dispatcher->dispatch($httpMethod, $uri);
+        switch ($routeInfo[0]) {
+            case FastRoute\Dispatcher::NOT_FOUND:
+                // ... 404 Not Found
+                break;
+            case FastRoute\Dispatcher::METHOD_NOT_ALLOWED:
+                $allowedMethods = $routeInfo[1];
+                // ... 405 Method Not Allowed
+                break;
+            case FastRoute\Dispatcher::FOUND:
+                $handler = $routeInfo[1];
+                $vars    = $routeInfo[2];
+
+                [$controller, $method] = $handler;
+                try {
+                    $response = (new $controller())->{$method}(...array_values($vars));
+                } catch (Exception $e) {
+                    var_dump($e);
+                    die;
+                }
+
+
+                switch (true) {
+                    case $response instanceof ViewResponse:
+                        echo $twig->render($response->getViewName() . '.twig', $response->getData());
+                        break;
+                    case $response instanceof RedirectResponse:
+                        header('Location: ' . $response->getLocation());
+                        break;
+                }
+                break;
+        }
     }
 
-    private function buildModel(array $task): Task
-    {
-        return new Task(
-            $task['task_name'],
-            $task['task_description'],
-            $task['created_at'],
-            (int)$task['id']
-        );
-    }
+
 }
