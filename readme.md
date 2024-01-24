@@ -65,4 +65,4 @@ for example using the built-in webserver
 
 ## App structure and choices
 
-- [](public/index.php) entry   
+- [public/index.php](public/index.php) entry   
