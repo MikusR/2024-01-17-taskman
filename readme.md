@@ -1,4 +1,4 @@
-# title: A simple Task Manager app
+# A simple Task Manager app
 
 Application for making a simple list of tasks
 
