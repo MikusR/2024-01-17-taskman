@@ -1,6 +1,4 @@
----
-title: A simple Task Manager app
----
+# title: A simple Task Manager app
 
 Application for making a simple list of tasks
 
@@ -67,4 +65,4 @@ for example using the built-in webserver
 
 ## App structure and choices
 
-- (public/index.php) entry   
+- [](public/index.php) entry   
