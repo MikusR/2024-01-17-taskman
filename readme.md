@@ -37,6 +37,7 @@ $ composer install
 
 copy .env.example to .env
 and configure access to database
+for example:
 
 ```ini
 TIMEZONE = "Europe/Riga"
@@ -45,6 +46,20 @@ USER = "taskman"
 PASSWORD = "taskman"
 HOST = "localhost"
 DRIVER = "pdo_mysql"
+```
+
+database uses this table
+
+```sql
+create table tasks
+(
+    id               int auto_increment
+        primary key,
+    task_name        varchar(255) null,
+    task_description text         null,
+    created_at       datetime     null
+);
+
 ```
 
 run the application from /public directory
