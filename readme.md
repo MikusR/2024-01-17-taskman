@@ -65,4 +65,10 @@ for example using the built-in webserver
 
 ## App structure and choices
 
-- [public/index.php](public/index.php) entry   
+- [public/index.php](public/index.php) entry point for the application.
+- [app/Application.php](app/Application.php) deals with setting up the environment, routing. Calls the main controller
+  and delegates to Twig.
+- [app/Controllers/TaskController.php](app/Controllers/TaskController.php) creates connection to database and creating
+  of Tasks.
+- [app/Models](app/Models) contains the used models.
+- [app/Views](app/Views) contains the Twig templates
