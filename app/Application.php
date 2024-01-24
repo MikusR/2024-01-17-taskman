@@ -9,6 +9,7 @@ use Twig\Environment;
 use Twig\Error\Error;
 use Twig\Loader\FilesystemLoader;
 use FastRoute;
+use Dotenv;
 
 
 class Application
@@ -17,8 +18,11 @@ class Application
 
     public function run(): void
     {
+        //Setup dotenv
+        $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
+        $dotenv->safeLoad();
         //Set configuration parameters
-        date_default_timezone_set("Europe/Riga");
+        date_default_timezone_set($_ENV['TIMEZONE']);
 
         //Initialize twig
         $loader            = new FilesystemLoader(__DIR__ . '/Views');
@@ -59,6 +63,7 @@ class Application
                 $response = (new $controller())->{$method}(...array_values($vars));
 
                 $twig->addGlobal('error', $_SESSION['error']);
+                $twig->addGlobal('nameError', $_SESSION['nameError']);
 
                 switch (true) {
                     case $response instanceof ViewResponse:

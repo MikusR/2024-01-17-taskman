@@ -9,7 +9,6 @@ use App\Models\TaskCollection;
 use App\RedirectResponse;
 use App\Response;
 use App\ViewResponse;
-use Carbon\Carbon;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Exception;
@@ -21,11 +20,11 @@ class TaskController
     public function __construct()
     {
         $connectionParams = [
-            'dbname'   => 'task_manager',
-            'user'     => 'taskman',
-            'password' => 'taskman',
-            'host'     => 'localhost',
-            'driver'   => 'pdo_mysql',
+            'dbname'   => $_ENV['DBNAME'],
+            'user'     => $_ENV['USER'],
+            'password' => $_ENV['PASSWORD'],
+            'host'     => $_ENV['HOST'],
+            'driver'   => $_ENV['DRIVER'],
         ];
 
         try {
@@ -57,10 +56,18 @@ class TaskController
 
     public function add(): Response
     {
-        $name        = (strlen($_POST['name']) > 0) ? $_POST['name'] : (string)Carbon::now();
+        if (strlen($_POST['name']) <= 0) {
+            $_SESSION['nameError'] = ['missing' => true, 'description' => $_POST['description']];
+
+            return new RedirectResponse('/');
+        }
+        $name        = $_POST['name'];
         $description = $_POST['description'];
-        $task        = new Task($name, $description);
+
+        $task = new Task($name, $description);
         $this->save($task);
+        
+        $_SESSION['nameError'] = [];
 
         return new RedirectResponse('/');
     }
