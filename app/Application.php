@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App;
 
 use App\Controllers\TaskController;
-use Doctrine\DBAL\Exception;
 use Twig\Environment;
+use Twig\Error\Error;
 use Twig\Loader\FilesystemLoader;
 use FastRoute;
 
@@ -17,10 +17,14 @@ class Application
 
     public function run(): void
     {
+        //Set configuration parameters
+        date_default_timezone_set("Europe/Riga");
+
         //Initialize twig
-        $loader = new FilesystemLoader(__DIR__ . '/Views');
-        $twig   = new Environment($loader, []);
-        $twig->addGlobal('errors', false);
+        $loader            = new FilesystemLoader(__DIR__ . '/Views');
+        $twig              = new Environment($loader, []);
+        $_SESSION['error'] = [];
+
         //Router
         $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) {
             $r->addRoute('GET', '/', [TaskController::class, 'index']);
@@ -51,17 +55,18 @@ class Application
                 $vars    = $routeInfo[2];
 
                 [$controller, $method] = $handler;
-                try {
-                    $response = (new $controller())->{$method}(...array_values($vars));
-                } catch (Exception $e) {
-                    var_dump($e);
-                    die;
-                }
 
+                $response = (new $controller())->{$method}(...array_values($vars));
+
+                $twig->addGlobal('error', $_SESSION['error']);
 
                 switch (true) {
                     case $response instanceof ViewResponse:
-                        echo $twig->render($response->getViewName() . '.twig', $response->getData());
+                        try {
+                            echo $twig->render($response->getViewName() . '.twig', $response->getData());
+                        } catch (Error $e) {
+                            echo "<h2>There is an error with this application</h2>";
+                        }
                         break;
                     case $response instanceof RedirectResponse:
                         header('Location: ' . $response->getLocation());

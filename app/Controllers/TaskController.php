@@ -28,8 +28,18 @@ class TaskController
             'driver'   => 'pdo_mysql',
         ];
 
-        $this->database = DriverManager::getConnection($connectionParams);
+        try {
+            $this->database = DriverManager::getConnection($connectionParams);
+            $this->database->connect();
+        } catch (Exception $e) {
+            $_SESSION['error'] = [
+                'status'      => true,
+                'message'     => "Can't connect to database",
+                'description' => $e->getMessage()
+            ];
+        }
     }
+
 
     public function index(): ViewResponse
     {
@@ -38,9 +48,9 @@ class TaskController
         return new ViewResponse('index', ['tasks' => $tasks]);
     }
 
-    public function show(int $id): Response
+    public function show(string $id): Response
     {
-        $task = $this->getById($id);
+        $task = $this->getById((int)$id);
 
         return new ViewResponse('show', ['task' => $task]);
     }
@@ -55,13 +65,21 @@ class TaskController
         return new RedirectResponse('/');
     }
 
-    public function delete(int $id): Response
+    public function delete(string $id): Response
     {
-        $this->database->createQueryBuilder()
-                       ->delete('tasks')
-                       ->where('id = :id')
-                       ->setParameter('id', $id)
-                       ->executeQuery();
+        try {
+            $this->database->createQueryBuilder()
+                           ->delete('tasks')
+                           ->where('id = :id')
+                           ->setParameter('id', (int)$id)
+                           ->executeQuery();
+        } catch (Exception $e) {
+            $_SESSION['error'] = [
+                'status'      => true,
+                'message'     => "Can't delete task",
+                'description' => $e->getMessage()
+            ];
+        }
 
         return new RedirectResponse('/');
     }
@@ -83,6 +101,11 @@ class TaskController
                            ])
                            ->executeQuery();
         } catch (Exception $e) {
+            $_SESSION['error'] = [
+                'status'      => true,
+                'message'     => "Can't save task",
+                'description' => $e->getMessage()
+            ];
         }
     }
 
@@ -96,6 +119,12 @@ class TaskController
                                    ->setParameter('id', $id)
                                    ->fetchAssociative();
         } catch (Exception $e) {
+            $_SESSION['error'] = [
+                'status'      => true,
+                'message'     => "Can't get task",
+                'description' => $e->getMessage()
+            ];
+
             return null;
         }
         if ( ! $task) {
@@ -113,6 +142,11 @@ class TaskController
                                        ->from('tasks')
                                        ->fetchAllAssociative();
         } catch (Exception $e) {
+            $_SESSION['error'] = [
+                'status'      => true,
+                'message'     => "Can't get list of tasks",
+                'description' => $e->getMessage()
+            ];
         }
         if (empty($taskList)) {
             return null;

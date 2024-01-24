@@ -1,26 +1,59 @@
-List of tasks
-<form method="post" action="/">
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="simple.css">
+    <title>List of tasks</title>
 
-    <label>Name:
-        <input name="name" type="text">
-    </label>
-    <label for="description">Description:</label>
-    <textarea id="description" name="description">Description</textarea>
-    <button type="submit">Add</button>
 
-</form>
+</head>
+<body>
 
-{% for task in tasks.all %}
-    <div>
-        <h3><a href="/task/{{ task.id }}">{{ task.name }}</a></h3>
-        <h2>{{ task.description }}</h2>
-        <p>{{ task.created }}</p>
+{% if error.status %}
+    <details>
+        <summary>{{ error.message }}</summary>
+        <p>{{ error.description }}</p>
+    </details>
+{% endif %}
+<section>
+    <form method="post" action="/">
+
+        <label>Name:
+            <input name="name" type="text">
+        </label>
+        <label for="description">Description:</label>
+        <textarea id="description" name="description">Description</textarea>
+        <button type="submit">Add</button>
+
+    </form>
+</section>
+<table>
+    <thead>
+    <tr>
+        <th>Name</th>
+        <th>Description</th>
+        <th>Created</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for task in tasks.all %}
+
+        <tr>
+            <td><a href="/task/{{ task.id }}">{{ task.name }}</a></td>
+            <td>{{ task.description }}</td>
+            <td>{{ task.created }}</td>
+        </tr>
+
 
         {#        onclick="return confirm('delete?')" #}
-        <form action="/task/{{ task.id }}/delete" method="post">
-            <button type="submit">delete</button>
-        </form>
-        <br/>
-    </div>
-{% endfor %}
-
+        {#            <form action="/task/{{ task.id }}/delete" method="post"> #}
+        {#                <button type="submit">delete</button> #}
+        {#            </form> #}
+    {% endfor %}
+    </tbody>
+</table>
+</body>
+</html>
