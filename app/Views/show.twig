@@ -9,10 +9,16 @@
     <title>Task {{ task.id }}</title>
 </head>
 <body>
+{% if error.status %}
+    <details>
+        <summary>{{ error.message }}</summary>
+        <p>{{ error.description }}</p>
+    </details>
+{% endif %}
 <h3><a href="/">{{ task.name }}</a></h3>
 <blockquote>
     <p>{{ task.description }}</p>
-    <p><cite>– {{ task.created }}</cite></p>
+    <p><cite>{{ task.created }}</cite></p>
 </blockquote>
 
 <h2></h2>
