@@ -69,6 +69,19 @@ for example using the built-in webserver
  php -S localhost:8765 -t .\public
 ```
 
+If using apache then check if /etc/apache2/apache2.conf has AllowOverride and use .htaccess. Also check if mod_rewrite
+is enabled
+
+```ini
+RewriteEngine On
+RewriteCond %{REQUEST_URI} : :$0 ^(/.+)/(.*)::\2$
+RewriteRule .* - [E=BASE:%1]
+RewriteCond %{ENV : REDIRECT_STATUS} =""
+RewriteRule ^index\.php(? : /(.*)|$) %{ENV:BASE}/$1 [R=301,L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^ %{ENV : BASE}/index.php [L]
+```
+
 ## Used packages
 
 - doctrine/dbal (access to database)
