@@ -35,6 +35,20 @@
 
     </form>
 </section>
+<section>
+    <h4>Enter search term</h4>
+    {% if nameError.missing %}
+        <p class="notice">Search value required.</p>
+    {% endif %}
+
+    <form method="post" action="/search">
+
+        <label for="term">Term:</label>
+        <input autofocus name="term" id="term" type="search" size="50">
+        <button type="submit">Search</button>
+
+    </form>
+</section>
 <table>
     <thead>
     <tr>

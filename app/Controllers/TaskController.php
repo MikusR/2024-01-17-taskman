@@ -79,12 +79,13 @@ class TaskController
 
     public function showSearch(): Response
     {
-        return new ViewResponse('results', []);
+        return new RedirectResponse('/');
     }
 
     public function search(): Response
     {
         $term = $_POST['term'];
+
 
         $builder = $this->database->createQueryBuilder();
         $tasks   = $builder->select('*')
@@ -96,6 +97,10 @@ class TaskController
                            ->setParameter('term', '%'.$term.'%')
                            ->fetchAllAssociative();
 
+        if (count($tasks) === 0) {
+            return new ViewResponse('index', ['tasks' => []]);
+        }
+
         $results = new TaskCollection();
         foreach ($tasks as $task) {
             $results->add(
@@ -104,7 +109,7 @@ class TaskController
         }
 
 
-        return new ViewResponse('results', ['tasks' => $results]);
+        return new ViewResponse('index', ['tasks' => $results]);
     }
 
     public function add(): Response
