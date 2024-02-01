@@ -76,6 +76,7 @@ class Application
                             echo $twig->render($response->getViewName().'.twig', $response->getData());
                         } catch (Error $e) {
                             echo "<h2>There is an error with this application</h2>";
+                            echo "<p>{$e->getMessage()}</p>";
                         }
                         break;
                     case $response instanceof RedirectResponse:
