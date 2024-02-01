@@ -49,9 +49,39 @@ class TaskController
 
     public function show(string $id): Response
     {
-        $task = $this->getById((int)$id);
+        $task = $this->getById((int) $id);
 
         return new ViewResponse('show', ['task' => $task]);
+    }
+
+    public function showSearch(): Response
+    {
+        return new ViewResponse('results', []);
+    }
+
+    public function search(): Response
+    {
+        $term = $_POST['term'];
+
+        $builder = $this->database->createQueryBuilder();
+        $tasks   = $builder->select('*')
+                           ->from('tasks')
+                           ->where(
+                               $builder->expr()->or(
+                                   $builder->expr()->like('task_description', ':term'),
+                                   $builder->expr()->like('task_name', ':term')))
+                           ->setParameter('term', '%'.$term.'%')
+                           ->fetchAllAssociative();
+
+        $results = new TaskCollection();
+        foreach ($tasks as $task) {
+            $results->add(
+                $this->buildModel($task)
+            );
+        }
+
+
+        return new ViewResponse('results', ['tasks' => $results]);
     }
 
     public function add(): Response
@@ -66,7 +96,7 @@ class TaskController
 
         $task = new Task($name, $description);
         $this->save($task);
-        
+
         $_SESSION['nameError'] = [];
 
         return new RedirectResponse('/');
@@ -78,7 +108,7 @@ class TaskController
             $this->database->createQueryBuilder()
                            ->delete('tasks')
                            ->where('id = :id')
-                           ->setParameter('id', (int)$id)
+                           ->setParameter('id', (int) $id)
                            ->executeQuery();
         } catch (Exception $e) {
             $_SESSION['error'] = [
@@ -174,7 +204,7 @@ class TaskController
             $task['task_name'],
             $task['task_description'],
             $task['created_at'],
-            (int)$task['id']
+            (int) $task['id']
         );
     }
 }
