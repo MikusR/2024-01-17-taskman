@@ -45,4 +45,14 @@ class Task
     {
         return $this->id ?? null;
     }
+
+    public function set_name(string $name): void
+    {
+        $this->name = $name;
+    }
+
+    public function set_description(?string $description): void
+    {
+        $this->description = $description;
+    }
 }

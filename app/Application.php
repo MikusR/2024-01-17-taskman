@@ -19,13 +19,13 @@ class Application
     public function run(): void
     {
         //Setup dotenv
-        $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
+        $dotenv = Dotenv\Dotenv::createImmutable(__DIR__.'/../');
         $dotenv->safeLoad();
         //Set configuration parameters
         date_default_timezone_set($_ENV['TIMEZONE']);
 
         //Initialize twig
-        $loader            = new FilesystemLoader(__DIR__ . '/Views');
+        $loader            = new FilesystemLoader(__DIR__.'/Views');
         $twig              = new Environment($loader, []);
         $_SESSION['error'] = [];
 
@@ -33,6 +33,11 @@ class Application
         $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) {
             $r->addRoute('GET', '/', [TaskController::class, 'index']);
             $r->addRoute('POST', '/', [TaskController::class, 'add']);
+            $r->addRoute('POST', '/search', [TaskController::class, 'search']);
+            $r->addRoute('GET', '/search', [TaskController::class, 'showSearch']);
+
+            $r->addRoute('GET', '/task/{id:\d+}/edit', [TaskController::class, 'edit']);
+            $r->addRoute('POST', '/task/{id:\d+}', [TaskController::class, 'update']);
             $r->addRoute('GET', '/task/{id:\d+}', [TaskController::class, 'show']);
             $r->addRoute('POST', '/task/{id:\d+}/delete', [TaskController::class, 'delete']);
         });
@@ -68,13 +73,14 @@ class Application
                 switch (true) {
                     case $response instanceof ViewResponse:
                         try {
-                            echo $twig->render($response->getViewName() . '.twig', $response->getData());
+                            echo $twig->render($response->getViewName().'.twig', $response->getData());
                         } catch (Error $e) {
                             echo "<h2>There is an error with this application</h2>";
+                            echo "<p>{$e->getMessage()}</p>";
                         }
                         break;
                     case $response instanceof RedirectResponse:
-                        header('Location: ' . $response->getLocation());
+                        header('Location: '.$response->getLocation());
                         break;
                 }
                 break;

@@ -49,9 +49,67 @@ class TaskController
 
     public function show(string $id): Response
     {
-        $task = $this->getById((int)$id);
+        $task = $this->getById((int) $id);
 
         return new ViewResponse('show', ['task' => $task]);
+    }
+
+    public function edit(string $id): Response
+    {
+        $task = $this->getById((int) $id);
+
+        return new ViewResponse('edit', ['task' => $task]);
+    }
+
+    public function update(string $id): Response
+    {
+        $task = $this->getById((int) $id);
+
+        $name        = $_POST['name'];
+        $description = $_POST['description'];
+
+        $task->set_name($name);
+
+        $task->set_description($description);
+
+        $this->save($task);
+
+        return new RedirectResponse('/');
+    }
+
+    public function showSearch(): Response
+    {
+        return new RedirectResponse('/');
+    }
+
+    public function search(): Response
+    {
+        $term = $_POST['term'];
+
+
+        $builder = $this->database->createQueryBuilder();
+        $tasks   = $builder->select('*')
+                           ->from('tasks')
+                           ->where(
+                               $builder->expr()->or(
+                                   $builder->expr()->like('task_description', ':term'),
+                                   $builder->expr()->like('task_name', ':term')))
+                           ->setParameter('term', '%'.$term.'%')
+                           ->fetchAllAssociative();
+
+        if (count($tasks) === 0) {
+            return new ViewResponse('index', ['tasks' => []]);
+        }
+
+        $results = new TaskCollection();
+        foreach ($tasks as $task) {
+            $results->add(
+                $this->buildModel($task)
+            );
+        }
+
+
+        return new ViewResponse('index', ['tasks' => $results]);
     }
 
     public function add(): Response
@@ -66,11 +124,12 @@ class TaskController
 
         $task = new Task($name, $description);
         $this->save($task);
-        
+
         $_SESSION['nameError'] = [];
 
         return new RedirectResponse('/');
     }
+
 
     public function delete(string $id): Response
     {
@@ -78,7 +137,7 @@ class TaskController
             $this->database->createQueryBuilder()
                            ->delete('tasks')
                            ->where('id = :id')
-                           ->setParameter('id', (int)$id)
+                           ->setParameter('id', (int) $id)
                            ->executeQuery();
         } catch (Exception $e) {
             $_SESSION['error'] = [
@@ -91,22 +150,36 @@ class TaskController
         return new RedirectResponse('/');
     }
 
+
     private function save(Task $task): void
     {
         try {
-            $this->database->createQueryBuilder()
-                           ->insert('tasks')
-                           ->values([
-                               'task_name'        => ':name',
-                               'task_description' => ':description',
-                               'created_at'       => ':created'
-                           ])
-                           ->setParameters([
-                               'name'        => $task->getName(),
-                               'description' => $task->getDescription(),
-                               'created'     => $task->getCreated()
-                           ])
-                           ->executeQuery();
+            $builder = $this->database->createQueryBuilder();
+            if ($task->getId()) {
+                $builder->update('tasks')
+                        ->where('id = :id')
+                        ->set('task_name', ':name')
+                        ->set('task_description', ':description')
+                        ->setParameters([
+                            'name'        => $task->getName(),
+                            'description' => $task->getDescription(),
+                            'id'          => $task->getId()
+                        ])
+                        ->executeQuery();
+            } else {
+                $builder->insert('tasks')
+                        ->values([
+                            'task_name'        => ':name',
+                            'task_description' => ':description',
+                            'created_at'       => ':created'
+                        ])
+                        ->setParameters([
+                            'name'        => $task->getName(),
+                            'description' => $task->getDescription(),
+                            'created'     => $task->getCreated()
+                        ])
+                        ->executeQuery();
+            }
         } catch (Exception $e) {
             $_SESSION['error'] = [
                 'status'      => true,
@@ -174,7 +247,7 @@ class TaskController
             $task['task_name'],
             $task['task_description'],
             $task['created_at'],
-            (int)$task['id']
+            (int) $task['id']
         );
     }
 }
