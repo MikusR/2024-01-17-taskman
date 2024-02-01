@@ -16,6 +16,7 @@
     </details>
 {% endif %}
 <h3><a href="/">{{ task.name }}</a></h3>
+<a href="/task/{{ task.id }}/edit">edit</a>
 <blockquote>
     <p>{{ task.description }}</p>
     <p><cite>{{ task.created }}</cite></p>

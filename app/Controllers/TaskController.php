@@ -54,6 +54,29 @@ class TaskController
         return new ViewResponse('show', ['task' => $task]);
     }
 
+    public function edit(string $id): Response
+    {
+        $task = $this->getById((int) $id);
+
+        return new ViewResponse('edit', ['task' => $task]);
+    }
+
+    public function update(string $id): Response
+    {
+        $task = $this->getById((int) $id);
+
+        $name        = $_POST['name'];
+        $description = $_POST['description'];
+
+        $task->set_name($name);
+
+        $task->set_description($description);
+
+        $this->save($task);
+
+        return new RedirectResponse('/');
+    }
+
     public function showSearch(): Response
     {
         return new ViewResponse('results', []);
@@ -102,6 +125,7 @@ class TaskController
         return new RedirectResponse('/');
     }
 
+
     public function delete(string $id): Response
     {
         try {
@@ -121,22 +145,36 @@ class TaskController
         return new RedirectResponse('/');
     }
 
+
     private function save(Task $task): void
     {
         try {
-            $this->database->createQueryBuilder()
-                           ->insert('tasks')
-                           ->values([
-                               'task_name'        => ':name',
-                               'task_description' => ':description',
-                               'created_at'       => ':created'
-                           ])
-                           ->setParameters([
-                               'name'        => $task->getName(),
-                               'description' => $task->getDescription(),
-                               'created'     => $task->getCreated()
-                           ])
-                           ->executeQuery();
+            $builder = $this->database->createQueryBuilder();
+            if ($task->getId()) {
+                $builder->update('tasks')
+                        ->where('id = :id')
+                        ->set('task_name', ':name')
+                        ->set('task_description', ':description')
+                        ->setParameters([
+                            'name'        => $task->getName(),
+                            'description' => $task->getDescription(),
+                            'id'          => $task->getId()
+                        ])
+                        ->executeQuery();
+            } else {
+                $builder->insert('tasks')
+                        ->values([
+                            'task_name'        => ':name',
+                            'task_description' => ':description',
+                            'created_at'       => ':created'
+                        ])
+                        ->setParameters([
+                            'name'        => $task->getName(),
+                            'description' => $task->getDescription(),
+                            'created'     => $task->getCreated()
+                        ])
+                        ->executeQuery();
+            }
         } catch (Exception $e) {
             $_SESSION['error'] = [
                 'status'      => true,

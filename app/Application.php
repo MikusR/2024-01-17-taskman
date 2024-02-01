@@ -35,7 +35,9 @@ class Application
             $r->addRoute('POST', '/', [TaskController::class, 'add']);
             $r->addRoute('POST', '/search', [TaskController::class, 'search']);
             $r->addRoute('GET', '/search', [TaskController::class, 'showSearch']);
-            
+
+            $r->addRoute('GET', '/task/{id:\d+}/edit', [TaskController::class, 'edit']);
+            $r->addRoute('POST', '/task/{id:\d+}', [TaskController::class, 'update']);
             $r->addRoute('GET', '/task/{id:\d+}', [TaskController::class, 'show']);
             $r->addRoute('POST', '/task/{id:\d+}/delete', [TaskController::class, 'delete']);
         });
