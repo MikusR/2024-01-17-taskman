@@ -42,7 +42,7 @@ for example:
 ```ini
 TIMEZONE = "Europe/Riga"
 DBNAME = "task_manager"
-USER = "taskman"
+DBUSER = "taskman"
 PASSWORD = "taskman"
 HOST = "localhost"
 DRIVER = "pdo_mysql"

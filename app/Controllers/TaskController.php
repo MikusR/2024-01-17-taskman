@@ -20,11 +20,11 @@ class TaskController
     public function __construct()
     {
         $connectionParams = [
-            'dbname'   => $_ENV['DBNAME'],
-            'user'     => $_ENV['USER'],
+            'dbname' => $_ENV['DBNAME'],
+            'user' => $_ENV['DBUSER'],
             'password' => $_ENV['PASSWORD'],
-            'host'     => $_ENV['HOST'],
-            'driver'   => $_ENV['DRIVER'],
+            'host' => $_ENV['HOST'],
+            'driver' => $_ENV['DRIVER'],
         ];
 
         try {
@@ -32,8 +32,8 @@ class TaskController
             $this->database->connect();
         } catch (Exception $e) {
             $_SESSION['error'] = [
-                'status'      => true,
-                'message'     => "Can't connect to database",
+                'status' => true,
+                'message' => "Can't connect to database",
                 'description' => $e->getMessage()
             ];
         }
@@ -65,7 +65,7 @@ class TaskController
     {
         $task = $this->getById((int) $id);
 
-        $name        = $_POST['name'];
+        $name = $_POST['name'];
         $description = $_POST['description'];
 
         $task->set_name($name);
@@ -88,14 +88,16 @@ class TaskController
 
 
         $builder = $this->database->createQueryBuilder();
-        $tasks   = $builder->select('*')
-                           ->from('tasks')
-                           ->where(
-                               $builder->expr()->or(
-                                   $builder->expr()->like('task_description', ':term'),
-                                   $builder->expr()->like('task_name', ':term')))
-                           ->setParameter('term', '%'.$term.'%')
-                           ->fetchAllAssociative();
+        $tasks = $builder->select('*')
+            ->from('tasks')
+            ->where(
+                $builder->expr()->or(
+                    $builder->expr()->like('task_description', ':term'),
+                    $builder->expr()->like('task_name', ':term')
+                )
+            )
+            ->setParameter('term', '%' . $term . '%')
+            ->fetchAllAssociative();
 
         if (count($tasks) === 0) {
             return new ViewResponse('index', ['tasks' => []]);
@@ -119,7 +121,7 @@ class TaskController
 
             return new RedirectResponse('/');
         }
-        $name        = $_POST['name'];
+        $name = $_POST['name'];
         $description = $_POST['description'];
 
         $task = new Task($name, $description);
@@ -135,14 +137,14 @@ class TaskController
     {
         try {
             $this->database->createQueryBuilder()
-                           ->delete('tasks')
-                           ->where('id = :id')
-                           ->setParameter('id', (int) $id)
-                           ->executeQuery();
+                ->delete('tasks')
+                ->where('id = :id')
+                ->setParameter('id', (int) $id)
+                ->executeQuery();
         } catch (Exception $e) {
             $_SESSION['error'] = [
-                'status'      => true,
-                'message'     => "Can't delete task",
+                'status' => true,
+                'message' => "Can't delete task",
                 'description' => $e->getMessage()
             ];
         }
@@ -157,33 +159,33 @@ class TaskController
             $builder = $this->database->createQueryBuilder();
             if ($task->getId()) {
                 $builder->update('tasks')
-                        ->where('id = :id')
-                        ->set('task_name', ':name')
-                        ->set('task_description', ':description')
-                        ->setParameters([
-                            'name'        => $task->getName(),
-                            'description' => $task->getDescription(),
-                            'id'          => $task->getId()
-                        ])
-                        ->executeQuery();
+                    ->where('id = :id')
+                    ->set('task_name', ':name')
+                    ->set('task_description', ':description')
+                    ->setParameters([
+                        'name' => $task->getName(),
+                        'description' => $task->getDescription(),
+                        'id' => $task->getId()
+                    ])
+                    ->executeQuery();
             } else {
                 $builder->insert('tasks')
-                        ->values([
-                            'task_name'        => ':name',
-                            'task_description' => ':description',
-                            'created_at'       => ':created'
-                        ])
-                        ->setParameters([
-                            'name'        => $task->getName(),
-                            'description' => $task->getDescription(),
-                            'created'     => $task->getCreated()
-                        ])
-                        ->executeQuery();
+                    ->values([
+                        'task_name' => ':name',
+                        'task_description' => ':description',
+                        'created_at' => ':created'
+                    ])
+                    ->setParameters([
+                        'name' => $task->getName(),
+                        'description' => $task->getDescription(),
+                        'created' => $task->getCreated()
+                    ])
+                    ->executeQuery();
             }
         } catch (Exception $e) {
             $_SESSION['error'] = [
-                'status'      => true,
-                'message'     => "Can't save task",
+                'status' => true,
+                'message' => "Can't save task",
                 'description' => $e->getMessage()
             ];
         }
@@ -193,21 +195,21 @@ class TaskController
     {
         try {
             $task = $this->database->createQueryBuilder()
-                                   ->select('*')
-                                   ->from('tasks')
-                                   ->where('id = :id')
-                                   ->setParameter('id', $id)
-                                   ->fetchAssociative();
+                ->select('*')
+                ->from('tasks')
+                ->where('id = :id')
+                ->setParameter('id', $id)
+                ->fetchAssociative();
         } catch (Exception $e) {
             $_SESSION['error'] = [
-                'status'      => true,
-                'message'     => "Can't get task",
+                'status' => true,
+                'message' => "Can't get task",
                 'description' => $e->getMessage()
             ];
 
             return null;
         }
-        if ( ! $task) {
+        if (!$task) {
             return null;
         }
 
@@ -218,13 +220,13 @@ class TaskController
     {
         try {
             $taskList = $this->database->createQueryBuilder()
-                                       ->select('*')
-                                       ->from('tasks')
-                                       ->fetchAllAssociative();
+                ->select('*')
+                ->from('tasks')
+                ->fetchAllAssociative();
         } catch (Exception $e) {
             $_SESSION['error'] = [
-                'status'      => true,
-                'message'     => "Can't get list of tasks",
+                'status' => true,
+                'message' => "Can't get list of tasks",
                 'description' => $e->getMessage()
             ];
         }
