@@ -1,5 +1,7 @@
 # A simple Task Manager app
 
+[Test instance](https://taskman.mikusr.info)
+
 Application for making a simple list of tasks
 
 ## Screenshots
